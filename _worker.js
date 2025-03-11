@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- CSP配置：允许外部脚本和API请求 -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' https://api.ipify.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;">
+    <!-- 优化CSP配置，确保所有资源可加载 -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://api.ipify.org https://api.ip.sb https://api.ipdata.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://tc-212.pages.dev; media-src 'self' https://tc-212.pages.dev;">
     <title>纪念王杰 | Dave Wang Tribute</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+SC&display=swap');
@@ -606,8 +606,8 @@
             <h2 class="zh">关于王杰</h2>
             <h2 class="en" style="display: none;">About Dave Wang</h2>
             <div class="content">
-                <!-- 请替换为《我》专辑封面图片的直链 -->
-                <img src="https://example.com/dave-wang-wo-album-cover.jpg" alt="王杰《我》专辑封面">
+                <img src="https://tc-212.pages.dev/1741707565813.jpg" alt="王杰《我》专辑封面" 
+                     onerror="this.onerror=null; this.src='data:image/svg+xml;charset=utf-8,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 width%3D%22300%22 height%3D%22300%22 viewBox%3D%220 0 300 300%22%3E%3Crect fill%3D%22%23ff00ff%22 width%3D%22300%22 height%3D%22300%22%2F%3E%3Ctext fill%3D%22%23ffffff%22 font-family%3D%22Arial%22 font-size%3D%2220%22 x%3D%2275%22 y%3D%22150%22%3E%E7%8E%8B%E6%9D%B0%E4%B8%93%E8%BE%91%E5%B0%81%E9%9D%A2%3C%2Ftext%3E%3C%2Fsvg%3E';">
                 <div class="text-content">
                     <p class="zh">
                         王杰，原名王大为，1962年10月20日出生于香港，是华语乐坛的不灭之光。他的嗓音如电流划破寂静，沙哑而充满灵魂的张力。1987年，他以《一场游戏一场梦》点燃了无数夜晚，那首歌如星火般在记忆中闪烁。他的音乐融合了流行、摇滚与深情，如同一场穿越时间的旅程。
@@ -643,11 +643,13 @@
                 A timeless creation by Dave Wang, its melody dances like light and shadow, its lyrics fall like stars, narrating the eternal pursuit of love and life. It crosses time, a beacon in countless hearts.
             </p>
             <div class="player-container">
-                <!-- 请替换为《红尘有你》的音频直链 -->
-                <audio controls>
-                    <source src="https://example.com/dave-wang-hongchen-you-ni.mp3" type="audio/mpeg">
+                <audio controls id="audio-player">
+                    <source src="https://tc-212.pages.dev/1741708074944.mp3" type="audio/mpeg">
                     您的浏览器不支持音频播放。
                 </audio>
+                <div id="audio-fallback" style="display: none; text-align: center; margin-top: 10px;">
+                    <p>音频加载失败，请尝试 <a href="https://tc-212.pages.dev/1741708074944.mp3" target="_blank">直接下载</a></p>
+                </div>
             </div>
         </section>
 
@@ -661,11 +663,13 @@
                 This video preserves Dave Wang at his peak, a blazing figure on stage, every note burning like fire, igniting the depths of the audience’s souls.
             </p>
             <div class="player-container">
-                <!-- 请替换为王杰演唱会的视频直链 -->
-                <video controls>
-                    <source src="https://example.com/dave-wang-concert-video.mp4" type="video/mp4">
+                <video controls id="video-player">
+                    <source src="https://tc-212.pages.dev/1741708503810.mp4" type="video/mp4">
                     您的浏览器不支持视频播放。
                 </video>
+                <div id="video-fallback" style="display: none; text-align: center; margin-top: 10px;">
+                    <p>视频加载失败，请尝试 <a href="https://tc-212.pages.dev/1741708503810.mp4" target="_blank">直接下载</a></p>
+                </div>
             </div>
         </section>
 
@@ -751,7 +755,7 @@
             document.getElementById('beijing-date-en').textContent = enDate;
         }
 
-        // 获取并显示用户IP地址（直接使用你的代码）
+        // 获取IP地址，简化逻辑并优化错误处理
         function getUserIP() {
             const ipDisplay = document.getElementById('user-ip');
             if (!ipDisplay) {
@@ -761,36 +765,93 @@
 
             console.log('开始获取IP地址');
 
+            // 优先尝试最可靠的API：ipify
             fetch('https://api.ipify.org?format=json')
                 .then(response => {
-                    console.log('收到响应:', response.status);
-                    if (!response.ok) throw new Error('网络请求失败: ' + response.status);
+                    console.log('收到ipify响应:', response.status);
+                    if (!response.ok) throw new Error('ipify请求失败: ' + response.status);
                     return response.json();
                 })
                 .then(data => {
-                    console.log('API返回数据:', data);
+                    console.log('ipify返回数据:', data);
                     ipDisplay.textContent = data.ip || '未知IP';
                 })
                 .catch(error => {
-                    console.error('获取IP失败:', error.message || error);
-                    ipDisplay.textContent = '无法获取IP地址';
+                    console.error('ipify获取失败:', error);
+                    // 备用API：ip.sb
+                    fetch('https://api.ip.sb/jsonip')
+                        .then(response => {
+                            console.log('收到ip.sb响应:', response.status);
+                            if (!response.ok) throw new Error('ip.sb请求失败: ' + response.status);
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('ip.sb返回数据:', data);
+                            ipDisplay.textContent = data.ip || '未知IP';
+                        })
+                        .catch(error => {
+                            console.error('ip.sb获取失败:', error);
+                            // 最后备用：ipdata.co（无需API密钥的免费版本）
+                            fetch('https://api.ipdata.co?api-key=test')
+                                .then(response => {
+                                    console.log('收到ipdata.co响应:', response.status);
+                                    if (!response.ok) throw new Error('ipdata.co请求失败: ' + response.status);
+                                    return response.json();
+                                })
+                                .then(data => {
+                                    console.log('ipdata.co返回数据:', data);
+                                    ipDisplay.textContent = data.ip || '未知IP';
+                                })
+                                .catch(error => {
+                                    console.error('所有IP获取失败:', error);
+                                    ipDisplay.textContent = '无法获取IP地址';
+                                });
+                        });
                 });
+        }
+
+        // 检查媒体加载状态
+        function checkMediaLoading() {
+            const audioPlayer = document.getElementById('audio-player');
+            const audioFallback = document.getElementById('audio-fallback');
+            if (audioPlayer && audioFallback) {
+                audioPlayer.addEventListener('error', () => {
+                    console.error('音频加载失败');
+                    audioFallback.style.display = 'block';
+                });
+                audioPlayer.addEventListener('loadeddata', () => {
+                    console.log('音频加载成功');
+                    audioFallback.style.display = 'none';
+                });
+            }
+
+            const videoPlayer = document.getElementById('video-player');
+            const videoFallback = document.getElementById('video-fallback');
+            if (videoPlayer && videoFallback) {
+                videoPlayer.addEventListener('error', () => {
+                    console.error('视频加载失败');
+                    videoFallback.style.display = 'block';
+                });
+                videoPlayer.addEventListener('loadeddata', () => {
+                    console.log('视频加载成功');
+                    videoFallback.style.display = 'none';
+                });
+            }
         }
 
         // 初始化
         window.onload = function() {
             console.log('页面已加载');
-            // 添加语言切换事件
             const langToggleBtn = document.getElementById('lang-toggle-btn');
             if (langToggleBtn) {
                 langToggleBtn.addEventListener('click', toggleLanguage);
             } else {
                 console.error('未找到语言切换按钮');
             }
-            // 更新时间和IP
             updateBeijingTime();
             setInterval(updateBeijingTime, 1000);
-            getUserIP(); // 页面加载时自动获取IP
+            getUserIP();
+            checkMediaLoading();
         };
     </script>
 </body>
